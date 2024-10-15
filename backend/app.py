@@ -4,8 +4,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from pypinyin import lazy_pinyin
-from .lodis import LocalDist
-from .agent import get_agent
+from lodis import LocalDist
+from agent import get_agent
 
 app = Flask(__name__)
 CORS(app)
@@ -89,3 +89,6 @@ def ask_question():
 
     response = agent.ask(question)
     return jsonify({"ai_message": response, "sid": session_id}), 200
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
