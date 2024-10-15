@@ -4,8 +4,8 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from pypinyin import lazy_pinyin
-from .lodis import LocalDist
 from .agent import get_agent
+from .lodis import LocalDist
 
 app = Flask(__name__)
 CORS(app)
