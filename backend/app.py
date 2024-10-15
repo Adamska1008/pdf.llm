@@ -1,18 +1,16 @@
 import os
 import uuid
-from pydantic import BaseModel
 from loguru import logger
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from pypdf import PdfReader
 from werkzeug.utils import secure_filename
 from pypinyin import lazy_pinyin
-from .kvstore import GlobalKVStore
+from .lodis import LocalDist
 from .agent import get_agent
 
 app = Flask(__name__)
 CORS(app)
-kvstore = GlobalKVStore()
+kvstore = LocalDist()
 logger.remove()
 
 
@@ -87,9 +85,7 @@ def ask_question():
     fid: str | None = data.get("fid")
     if fid is not None:
         file_path = kvstore.get_file_path(fid)
-        reader = PdfReader(file_path)
-        docs = [page.extract_text() for page in reader.pages]
-        agent.augmented_with(docs, file_path)
+        agent.augmented_with(file_path)
 
     response = agent.ask(question)
     return jsonify({"ai_message": response, "sid": session_id}), 200

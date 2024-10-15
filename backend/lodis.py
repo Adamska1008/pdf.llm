@@ -1,4 +1,8 @@
-class GlobalKVStore:
+"""
+A Local Dist is used to store all infos that can be serialized.
+"""
+
+class LocalDist:
     """
     Local storage of all temporary info
     Currently not thread-safe
