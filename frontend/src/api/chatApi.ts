@@ -29,7 +29,7 @@ export interface UploadFileRequest {
 };
 
 export interface UploadFileResponse {
-    fuid: string,
+    fid: string,
     error: string,
 }
 

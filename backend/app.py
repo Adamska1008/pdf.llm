@@ -1,6 +1,5 @@
 import os
 import uuid
-from loguru import logger
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
@@ -11,7 +10,6 @@ from .agent import get_agent
 app = Flask(__name__)
 CORS(app)
 kvstore = LocalDist()
-logger.remove()
 
 
 @app.route("/api/ping", methods=["GET"])
@@ -28,7 +26,7 @@ def upload_pdf():
     Upload a pdf file
 
     Response:
-        - fuid (str): uid of the file
+        - fid (str): uid of the file
         - error (str): error msg when error occurs
     """
     if "file" not in request.files:
@@ -36,7 +34,6 @@ def upload_pdf():
     file = request.files["file"]
     if file.filename == "":
         return jsonify({"error": "no selected file"}), 400
-    print("The original file name is " + file.filename)
     if not file.filename.lower().endswith(".pdf"):
         return jsonify({"error": "only pdf files are allowed"}), 400
 
@@ -48,6 +45,7 @@ def upload_pdf():
     try:
         file.save(file_path)
         kvstore.put_file_path(str(uid), file_path)
+        print(f"Put {file.filename} to ./uploads/{safe_filename}")
         return jsonify({"fid": str(uid)}), 201
     except Exception as e:
         app.logger.error(str(e))
@@ -81,9 +79,11 @@ def ask_question():
         return jsonify({"error": "question is required"}), 400
 
     session_id: str | None = data.get("sid")
+    print(f"Ask with session id {session_id}")
     agent, session_id = get_agent(session_id)
     fid: str | None = data.get("fid")
     if fid is not None:
+        print(f"Ask with fid {fid}")
         file_path = kvstore.get_file_path(fid)
         agent.augmented_with(file_path)
 

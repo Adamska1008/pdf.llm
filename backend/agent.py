@@ -51,6 +51,7 @@ class RagChatBot:
         """ """
         if self._augmented_with == file_path:  # only initialized once
             return
+        self._augmented_with = file_path
         loader = PyPDFLoader(file_path)
         pages = [page for page in loader.load()]
 

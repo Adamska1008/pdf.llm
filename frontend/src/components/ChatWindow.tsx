@@ -5,10 +5,10 @@ import { AskMessage, AskResponse, UploadFileRequest, apiAsk, apiUploadFile } fro
 import MessageDisplay from "./MessageDisplay"
 
 const ChatWindow = () => {
-    const [messages, setMessages] = useState<string[]>([])
+    const [messages, setMessages] = useState<string[]>([]);
     const [sid, setSid] = useState<string | null>(null);
-    const [filename, setFilename] = useState<string | null>(null);
     const [fid, setFid] = useState<string | null>(null);
+    const [filename, setFilename] = useState<string | null>(null);
 
     const handleSendMessage = async (newMessage: string) => {
         setMessages((prevMessages) => [...prevMessages, newMessage])
@@ -23,7 +23,9 @@ const ChatWindow = () => {
             const response: AskResponse = await apiAsk(message);
 
             if (response.sid) {
+                console.log(`Get sid ${response.sid} from response`);
                 setSid(response.sid);
+                console.log("The sid is set to", sid);
             } else {
                 console.error("missing session_id in response from /api/ask", response);
             }
@@ -44,8 +46,10 @@ const ChatWindow = () => {
         };
         try {
             const response = await apiUploadFile(request);
-            if (response.fuid) {
-                setFid(response.fuid);
+            if (response.fid) {
+                console.log(`Get fid ${response.fid} from response`);
+                setFid(response.fid);
+                console.log("The fid is set to", fid);
             } else {
                 console.error("missing fid in repsonse from api upload pdf: ", response);
             }
