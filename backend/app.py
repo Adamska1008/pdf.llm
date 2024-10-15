@@ -83,6 +83,8 @@ def ask_question():
      - optional:
         - fid (str): the uid of file to be retrieved. If not given, will not use rag.
         - sid (str): the session id. If not given, will create a new one and respond with it.
+        - pageNumber (int)
+        - selectedText (string)
 
     Response:
         - ai_message (str): ai message
@@ -104,7 +106,12 @@ def ask_question():
         print(f"Ask with fid {fid}")
         file_path = kvstore.get_file_path(fid)
         agent.augmented_with(file_path)
-
+    page_number: int | None = data.get("pageNumber")
+    if page_number:
+        agent.focus_on_page(page_number)
+    selected_text = data.get("selectedText")
+    if selected_text:
+        agent.select_text(selected_text)
     response = agent.ask(question)
     return jsonify({"ai_message": response, "sid": session_id}), 200
 

@@ -2,6 +2,8 @@ export interface AskMessage {
     question: string,
     sid: string | null,
     fid: string | null,
+    pageNumber: number | null,
+    selectedText: string | null,
 };
 
 export interface AskResponse {
