@@ -1,6 +1,7 @@
 import os
 import uuid
-import logging
+from pydantic import BaseModel
+from loguru import logger
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pypdf import PdfReader
@@ -12,10 +13,14 @@ from .agent import get_agent
 app = Flask(__name__)
 CORS(app)
 kvstore = GlobalKVStore()
+logger.remove()
 
 
 @app.route("/api/ping", methods=["GET"])
 def ping():
+    """
+    Just make sure the network works.
+    """
     return jsonify({"ping": "pong"})
 
 
@@ -26,7 +31,7 @@ def upload_pdf():
 
     Response:
         - fuid (str): uid of the file
-        - error: error msg when error occurs
+        - error (str): error msg when error occurs
     """
     if "file" not in request.files:
         return jsonify({"error": "no file part"}), 400
@@ -38,15 +43,14 @@ def upload_pdf():
         return jsonify({"error": "only pdf files are allowed"}), 400
 
     uid = uuid.uuid1()
-    safe_filename = secure_filename(''.join(lazy_pinyin(file.filename)))
+    safe_filename = secure_filename("".join(lazy_pinyin(file.filename)))
     if not os.path.exists("./uploads"):
         os.makedirs("./uploads")
     file_path = os.path.join("./uploads", safe_filename)
     try:
         file.save(file_path)
         kvstore.put_file_path(str(uid), file_path)
-        app.logger.info(f"file {file.filename} has been saved to {file_path}")
-        return jsonify({"fuid": str(uid)}), 201
+        return jsonify({"fid": str(uid)}), 201
     except Exception as e:
         app.logger.error(str(e))
         return jsonify({"error": str(e)}), 500
@@ -63,7 +67,7 @@ def ask_question():
         - question (str): a question that user provide
 
      - optional:
-        - fuid (str): the uid of file to be retrieved. If not given, will not use rag.
+        - fid (str): the uid of file to be retrieved. If not given, will not use rag.
         - sid (str): the session id. If not given, will create a new one and respond with it.
 
     Response:
@@ -80,9 +84,9 @@ def ask_question():
 
     session_id: str | None = data.get("sid")
     agent, session_id = get_agent(session_id)
-    fuid: str | None = data.get("fuid")
-    if fuid is not None:
-        file_path = kvstore.get_file_path(fuid)
+    fid: str | None = data.get("fid")
+    if fid is not None:
+        file_path = kvstore.get_file_path(fid)
         reader = PdfReader(file_path)
         docs = [page.extract_text() for page in reader.pages]
         agent.augmented_with(docs, file_path)

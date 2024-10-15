@@ -1,6 +1,7 @@
 export interface AskMessage {
     question: string,
     sid: string | null,
+    fid: string | null,
 };
 
 export interface AskResponse {
@@ -28,6 +29,8 @@ export interface UploadFileRequest {
 };
 
 export interface UploadFileResponse {
+    fuid: string,
+    error: string,
 }
 
 export const apiUploadFile = async (request: UploadFileRequest): Promise<UploadFileResponse> => {
@@ -43,7 +46,7 @@ export const apiUploadFile = async (request: UploadFileRequest): Promise<UploadF
         body: formData
     });
     if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error("Reponse error: " + response.status + response.json());
     }
     return response.json();
 };
