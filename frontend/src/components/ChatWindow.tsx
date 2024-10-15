@@ -4,11 +4,16 @@ import { useState } from "react";
 import { AskMessage, AskResponse, UploadFileRequest, apiAsk, apiUploadFile } from "../api/chatApi";
 import MessageDisplay from "./MessageDisplay"
 
-const ChatWindow = () => {
+interface ChatWindowProps {
+    onFileUpload: (file: File) => void;
+};
+
+const ChatWindow = ({ onFileUpload }: ChatWindowProps) => {
     const [messages, setMessages] = useState<string[]>([]);
     const [sid, setSid] = useState<string | null>(null);
     const [fid, setFid] = useState<string | null>(null);
     const [filename, setFilename] = useState<string | null>(null);
+    const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
     const handleSendMessage = async (newMessage: string) => {
         setMessages((prevMessages) => [...prevMessages, newMessage])
@@ -56,6 +61,7 @@ const ChatWindow = () => {
         } catch (error) {
             console.error("File upload failed:", error);
         }
+        onFileUpload(file);
     };
 
     return (

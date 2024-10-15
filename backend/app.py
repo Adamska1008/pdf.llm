@@ -1,15 +1,24 @@
 import os
 import uuid
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from pypinyin import lazy_pinyin
-from lodis import LocalDist
-from agent import get_agent
+from .lodis import LocalDist
+from .agent import get_agent
 
 app = Flask(__name__)
 CORS(app)
 kvstore = LocalDist()
+
+UPLOAD_FOLDER = "uploads/"
+ALLOWED_EXTENSIONS = {"pdf"}
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+
+def allowed_file(filename: str):
+    return "." in filename and filename.split(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.route("/api/ping", methods=["GET"])
@@ -39,9 +48,7 @@ def upload_pdf():
 
     uid = uuid.uuid1()
     safe_filename = secure_filename("".join(lazy_pinyin(file.filename)))
-    if not os.path.exists("./uploads"):
-        os.makedirs("./uploads")
-    file_path = os.path.join("./uploads", safe_filename)
+    file_path = os.path.join(app.config["UPLOAD_FOLDER"], safe_filename)
     try:
         file.save(file_path)
         kvstore.put_file_path(str(uid), file_path)
@@ -50,6 +57,17 @@ def upload_pdf():
     except Exception as e:
         app.logger.error(str(e))
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/get_pdf/<fid>")
+def uploaded_file(fid: str):
+    filename = kvstore.get_file_path(fid)
+    if not filename:
+        return jsonify({"message": "file id not found"}), 404
+    file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    if not os.path.exists(file_path):
+        return jsonify({"message": "file not found"}), 404
+    return send_file(file_path, mimetype="application/pdf")
 
 
 @app.route("/api/ask", methods=["POST"])
@@ -90,5 +108,6 @@ def ask_question():
     response = agent.ask(question)
     return jsonify({"ai_message": response, "sid": session_id}), 200
 
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host="0.0.0.0", port=5000)

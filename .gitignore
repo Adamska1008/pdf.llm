@@ -183,3 +183,5 @@ sketch
 
 # where upload file stays
 uploads
+assets
+public
