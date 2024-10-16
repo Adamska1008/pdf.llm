@@ -3,7 +3,7 @@ import ChatWindow from './components/ChatWindow'
 import SinglePage from './components/SinglePage'
 import { useState } from 'react'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
-import SelectionPanel from './components/Selection'
+import SnippetsPanel from './components/Snippets'
 import { Stack } from '@mui/material'
 
 function App() {
@@ -35,7 +35,7 @@ function App() {
             <Panel defaultSize={45} minSize={15} order={2}>
                 <Stack direction="row">
                     <ChatWindow onFileUpload={handleFileUpload} currentPage={currentPage} />
-                    {pdfUrl && <SelectionPanel />}
+                    {pdfUrl && <SnippetsPanel />}
                 </Stack>
             </Panel>
         </PanelGroup>
