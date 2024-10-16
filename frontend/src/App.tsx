@@ -9,6 +9,7 @@ import { Stack } from '@mui/material'
 function App() {
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState<number>(1); // notice: the currentPage should be index from 1
+    const [selectedSnippets, setSelectedSnippets] = useState<string[] | null>(null);
 
     const handleFileUpload = (file: File) => {
         const reader = new FileReader();
@@ -34,8 +35,12 @@ function App() {
             )}
             <Panel defaultSize={45} minSize={15} order={2}>
                 <Stack direction="row">
-                    <ChatWindow onFileUpload={handleFileUpload} currentPage={currentPage} />
-                    {pdfUrl && <SnippetsPanel />}
+                    <ChatWindow
+                        selectedSnippets={selectedSnippets}
+                        currentPage={currentPage}
+                        onFileUpload={handleFileUpload}
+                    />
+                    {pdfUrl && <SnippetsPanel setSelectedSnippets={setSelectedSnippets} />}
                 </Stack>
             </Panel>
         </PanelGroup>

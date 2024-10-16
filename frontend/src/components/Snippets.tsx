@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { List, ListItem, ListItemText, ListItemButton } from "@mui/material";
-import { set } from "zod";
 
 const PINNED_SNIPPET_COLOR = 'grey.100';
 const SELECTED_SNIPPET_COLOR = '#757de8';
@@ -25,10 +24,13 @@ const listItemTextStyle = (isSelected: boolean) => ({
     textOverflow: 'ellipsis',
 });
 
-const SnippetsPanel = () => {
+interface SnippetsPanelProps {
+    setSelectedSnippets: React.Dispatch<React.SetStateAction<string[] | null>>
+};
+
+const SnippetsPanel = ({ setSelectedSnippets }: SnippetsPanelProps) => {
     // here selection means the text which use selected in pdf viewer
-    const [snippets, setSnippets] = useState<string[]>(
-        ['Hello world! What ever it is, it\'s a very long sentence, or maybe its not, anyway lets see whatis happening', 'Foobar']);
+    const [snippets, setSnippets] = useState<string[]>([]);
     const [selected, setSelected] = useState<Set<number>>(new Set<number>());
     const [textFromPdf, setTextFromPdf] = useState<string | null>(null);
 
@@ -50,7 +52,7 @@ const SnippetsPanel = () => {
     }, []);
 
     const handleSnippetClick = (
-        event: React.MouseEvent<HTMLDivElement, MouseEvent>,
+        _: React.MouseEvent<HTMLDivElement, MouseEvent>,
         index: number
     ) => {
         setSelected(prevSet => {
@@ -61,7 +63,11 @@ const SnippetsPanel = () => {
                 newSet.add(index);
             }
             return newSet;
-        })
+        });
+        // update the selected text to App.tsx
+        setSelectedSnippets(
+            Array.from(selected).map(index => snippets[index]).filter(str => str !== undefined)
+        );
     };
 
     const handleUnpinnedSnippetClick = (text: string) => {

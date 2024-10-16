@@ -1,37 +1,20 @@
-import { Stack, Box, Container, Typography } from "@mui/material";
+import { Stack, Container, Typography } from "@mui/material";
 import ChatInput from "./ChatInput";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AskMessage, AskResponse, UploadFileRequest, apiAsk, apiUploadFile } from "../api/chatApi";
 import MessageDisplay from "./MessageDisplay"
 
 interface ChatWindowProps {
+    currentPage: number,
+    selectedSnippets: string[] | null,
     onFileUpload: (file: File) => void;
-    currentPage: number
 };
 
-const ChatWindow = ({ onFileUpload, currentPage }: ChatWindowProps) => {
+const ChatWindow = ({ currentPage, selectedSnippets, onFileUpload }: ChatWindowProps) => {
     const [messages, setMessages] = useState<string[]>([]);
     const [sid, setSid] = useState<string | null>(null);
     const [fid, setFid] = useState<string | null>(null);
     const [filename, setFilename] = useState<string | null>(null);
-    const [selectedText, setSelectedText] = useState<string | null>(null);
-
-    // Detect Selection
-    useEffect(() => {
-        const handleMouseUp = () => {
-            const selection = window.getSelection();
-            if (selection && selection.toString()) {
-                console.log("Selected " + selection.toString());
-                setSelectedText(selection.toString());
-            } else {
-                setSelectedText(null);
-            }
-        };
-        window.addEventListener("mouseup", handleMouseUp);
-        return () => {
-            window.removeEventListener("mouseup", handleMouseUp);
-        }
-    }, []);
 
     const handleSendMessage = async (newMessage: string) => {
         setMessages((prevMessages) => [...prevMessages, newMessage])
@@ -41,7 +24,7 @@ const ChatWindow = ({ onFileUpload, currentPage }: ChatWindowProps) => {
             sid: sid,
             fid: fid,
             pageNumber: currentPage,
-            selectedText: selectedText
+            selectedSnippets: selectedSnippets,
         }
 
         try {

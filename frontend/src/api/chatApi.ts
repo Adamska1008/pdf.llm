@@ -3,7 +3,7 @@ export interface AskMessage {
     sid: string | null,
     fid: string | null,
     pageNumber: number | null,
-    selectedText: string | null,
+    selectedSnippets: string[] | null,
 };
 
 export interface AskResponse {

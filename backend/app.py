@@ -109,9 +109,9 @@ def ask_question():
     page_number: int | None = data.get("pageNumber")
     if page_number:
         agent.focus_on_page(page_number)
-    selected_text = data.get("selectedText")
-    if selected_text:
-        agent.select_text(selected_text)
+    selected_snippets = data.get("selectedText")
+    if selected_snippets:
+        agent.selected_snippets(selected_snippets)
     response = agent.ask(question)
     return jsonify({"ai_message": response, "sid": session_id}), 200
 

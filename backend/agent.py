@@ -30,7 +30,7 @@ class RagChatBot:
             "根据提供的问题，解决用户提出的问题。"
             "问题: {question}"
             "用户正在看第{page_number}页，请从第{page_number}页上寻找相关信息。"
-            "用户选中了文本{selected_text}。请在解决问题时参考这段话的内容。"
+            "用户选中了文本，如下所示：\n{selected_text}\n请在解决问题时参考这一部分的内容。"
             "上下文：{context}"
         )
         self._prompt = ChatPromptTemplate.from_messages(
@@ -45,7 +45,7 @@ class RagChatBot:
         self._retriever = None
         self._vectorstore = None
         self._page_number = None
-        self._selected_text = None
+        self._selected_snippets = None
 
     @property
     def _chain(self):
@@ -66,8 +66,20 @@ class RagChatBot:
     def focus_on_page(self, page_number: int):
         self._page_number = page_number
 
-    def select_text(self, selected_text: str):
-        self._selected_text = selected_text
+    def selected_snippets(self, _selected_snippets: str):
+        self._selected_snippets = _selected_snippets
+
+    @property
+    def selected_text(self):
+        """
+        combine the selected snippets to a single text
+        """
+        if not self._selected_snippets:
+            return None
+        res = ""
+        for index, snippet in enumerate(self._selected_snippets):
+            res += f"第{index}段文本：\n{snippet}\n"
+        return res
 
     def ask(self, question: str) -> str:
         if self._augmented_with is None:
@@ -75,15 +87,15 @@ class RagChatBot:
         else:
             question = (
                 question
-                if self._selected_text is None
-                else question + self._selected_text
+                if self.selected_text is None
+                else question + self.selected_text
             )
             docs = self._vectorstore.similarity_search(question, k=5)
             rag_input = self._rag_usermsg_prompt.format(
                 question=question,
                 context=docs,
                 page_number=self._page_number,
-                selected_text=self._selected_text,
+                selected_text=self.selected_text,
             )
             resp = self._chain.invoke({"chat_history": self._msgs, "input": rag_input})
         self._msgs.extend([HumanMessage(question), AIMessage(resp)])
