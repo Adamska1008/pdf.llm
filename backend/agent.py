@@ -90,7 +90,7 @@ class RagChatBot:
                 if self.selected_text is None
                 else question + self.selected_text
             )
-            docs = self._vectorstore.similarity_search(question, k=5)
+            docs = self._vectorstore.similarity_search(question, k=2)
             rag_input = self._rag_usermsg_prompt.format(
                 question=question,
                 context=docs,

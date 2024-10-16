@@ -6,7 +6,13 @@
 
 ![example](./docs/example.png)
 
-## OpenAI related
+**Features**
+
+1. Integrates a PDF Viewer with a ChatBot.
+2. Offers additional context to the LLM based on the current page being viewed.
+3. Allows selection and storage of snippets for easy reference during conversations with the LLM.
+
+## LLM Environment
 
 Before you begin, make sure to configure your OpenAI API key and, optionally the base URL
 
@@ -74,9 +80,10 @@ Currently, in version `v0.1.0`, pdf.llm is functional but not very user-friendly
 
 * (Important) An enhanced cursor-like UI for better user interaction.
 * (Important) Improved RAG performance.
+  * Currently the frontend give page number and snippets to LLM, but it works in a trivial way and not been optimized.
 * A streaming API for chat interactions.
+* Config menu for setting api key, base url, and more.
 * History persistence and session management.
-* Resizable ChatWindow and PdfViewer.
 
 ### Bug fix
 
