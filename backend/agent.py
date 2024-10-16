@@ -42,7 +42,6 @@ class RagChatBot:
         )
         self._llm = ChatOpenAI()
         self._str_parser = StrOutputParser()
-        self._retriever = None
         self._vectorstore = None
         self._page_number = None
         self._selected_snippets = None
@@ -84,6 +83,7 @@ class RagChatBot:
     def ask(self, question: str) -> str:
         if self._augmented_with is None:
             resp = self._chain.invoke({"chat_history": self._msgs, "input": question})
+            self._msgs.extend([HumanMessage(question), AIMessage(resp)])
         else:
             question = (
                 question
@@ -98,7 +98,7 @@ class RagChatBot:
                 selected_text=self.selected_text,
             )
             resp = self._chain.invoke({"chat_history": self._msgs, "input": rag_input})
-        self._msgs.extend([HumanMessage(question), AIMessage(resp)])
+            self._msgs.extend([HumanMessage(rag_input), AIMessage(resp)])
         return resp
 
 

@@ -21,6 +21,10 @@ function App() {
         reader.readAsDataURL(file);
     };
 
+    const handleSelectSnippets = (snippets: string[]) => {
+        setSelectedSnippets(snippets);
+    };
+
     return (
         <PanelGroup
             direction='horizontal'
@@ -40,7 +44,9 @@ function App() {
                         currentPage={currentPage}
                         onFileUpload={handleFileUpload}
                     />
-                    {pdfUrl && <SnippetsPanel setSelectedSnippets={setSelectedSnippets} />}
+                    {pdfUrl && <SnippetsPanel
+                        onSelectSnippets={handleSelectSnippets}
+                    />}
                 </Stack>
             </Panel>
         </PanelGroup>

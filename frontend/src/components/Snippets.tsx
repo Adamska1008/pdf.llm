@@ -25,10 +25,11 @@ const listItemTextStyle = (isSelected: boolean) => ({
 });
 
 interface SnippetsPanelProps {
-    setSelectedSnippets: React.Dispatch<React.SetStateAction<string[] | null>>
+    // when selectedSnippets is updated, the function shouble be called and pass the updated value to it
+    onSelectSnippets: (snippets: string[]) => void,
 };
 
-const SnippetsPanel = ({ setSelectedSnippets }: SnippetsPanelProps) => {
+const SnippetsPanel = ({ onSelectSnippets }: SnippetsPanelProps) => {
     // here selection means the text which use selected in pdf viewer
     const [snippets, setSnippets] = useState<string[]>([]);
     const [selected, setSelected] = useState<Set<number>>(new Set<number>());
@@ -65,7 +66,7 @@ const SnippetsPanel = ({ setSelectedSnippets }: SnippetsPanelProps) => {
             return newSet;
         });
         // update the selected text to App.tsx
-        setSelectedSnippets(
+        onSelectSnippets(
             Array.from(selected).map(index => snippets[index]).filter(str => str !== undefined)
         );
     };
