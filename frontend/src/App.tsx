@@ -1,8 +1,9 @@
 import './App.css'
 import ChatWindow from './components/ChatWindow'
-import { Stack, Box } from '@mui/material'
 import SinglePage from './components/SinglePage'
 import { useState } from 'react'
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
+import SplitPane from 'react-split-pane';
 
 function App() {
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -19,12 +20,27 @@ function App() {
     };
 
     return (
-        <Stack direction="row" sx={{ alignItems: "center" }}>
+        <PanelGroup
+            direction='horizontal'
+        >
             {pdfUrl && (
-                <SinglePage fileUrl={pdfUrl} onPageChange={(n) => { setCurrentPage(n + 1); }} />
+                <>
+                    <Panel defaultSize={60} minSize={25} maxSize={80} order={1}>
+                        <SinglePage fileUrl={pdfUrl} onPageChange={(n) => { setCurrentPage(n + 1); }} />
+                    </Panel>
+                    <PanelResizeHandle style={{ width: "4px", backgroundColor: 'lightgrey' }} />
+                </>
             )}
-            <ChatWindow onFileUpload={handleFileUpload} currentPage={currentPage} />
-        </Stack>
+            <Panel minSize={15} order={2}>
+                <ChatWindow onFileUpload={handleFileUpload} currentPage={currentPage} />
+            </Panel>
+        </PanelGroup>
+        // <Stack direction="row" sx={{ alignItems: "center" }}>
+        //     {pdfUrl && (
+        //         <SinglePage fileUrl={pdfUrl} onPageChange={(n) => { setCurrentPage(n + 1); }} />
+        //     )}
+        //     <ChatWindow onFileUpload={handleFileUpload} currentPage={currentPage} />
+        // </Stack>
     )
 }
 

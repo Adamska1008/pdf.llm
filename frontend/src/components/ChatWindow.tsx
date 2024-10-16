@@ -16,6 +16,7 @@ const ChatWindow = ({ onFileUpload, currentPage }: ChatWindowProps) => {
     const [filename, setFilename] = useState<string | null>(null);
     const [selectedText, setSelectedText] = useState<string | null>(null);
 
+    // Detect Selection
     useEffect(() => {
         const handleMouseUp = () => {
             const selection = window.getSelection();
@@ -85,7 +86,7 @@ const ChatWindow = ({ onFileUpload, currentPage }: ChatWindowProps) => {
 
     return (
         <Container
-            maxWidth="md"
+            maxWidth="sm"
             sx={{
                 height: "100vh",
                 display: 'flex',

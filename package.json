@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "@react-pdf/renderer": "^4.0.0"
+    "react-split-pane": "^0.1.92"
   }
 }
