@@ -1,3 +1,8 @@
+export const apiPing = async () : Promise<void> => {
+    const response = await fetch('http://localhost:5000/api/ping');
+    console.log(response.json());
+}
+
 export interface AskMessage {
     question: string,
     sid: string | null,
@@ -12,7 +17,7 @@ export interface AskResponse {
 };
 
 export const apiAsk = async (message: AskMessage): Promise<AskResponse> => {
-    const response = await fetch('http://localhost:5000/api/ask', {
+    const response = await fetch('http://127.0.0.1:5000/api/ask', {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

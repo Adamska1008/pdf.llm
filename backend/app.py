@@ -160,6 +160,7 @@ def stream_question():
     # return jsonify({"ai_message": response, "sid": session_id}), 200
     def generate_response():
         for word in agent.stream(question):
+            print(word)
             yield word
     return Response(generate_response(), content_type='text/event-stream'), 200
 

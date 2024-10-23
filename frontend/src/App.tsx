@@ -1,10 +1,11 @@
 import './App.css'
 import ChatWindow from './components/ChatWindow'
 import SinglePage from './components/SinglePage'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import SnippetsPanel from './components/Snippets'
 import { Stack } from '@mui/material'
+import { apiPing } from './api/chatApi'
 
 function App() {
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -24,6 +25,10 @@ function App() {
     const handleSelectSnippets = (snippets: string[]) => {
         setSelectedSnippets(snippets);
     };
+
+    useEffect(() => {
+        apiPing();
+    });
 
     return (
         <PanelGroup
