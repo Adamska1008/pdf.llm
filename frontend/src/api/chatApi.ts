@@ -25,6 +25,31 @@ export const apiAsk = async (message: AskMessage): Promise<AskResponse> => {
     return response.json();
 }
 
+export const apiStream = async (message: AskMessage, onMessage: (data: string) => void) : Promise<void> => {
+    const response = await fetch('http://localhost:5000/api/stream', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(message),
+    });
+    if (!response.ok) {
+        throw new Error("Network response was not ok");
+    }
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder('utf-8');
+    if (reader) {
+        while (true) {
+            const {done, value} = await reader.read();
+            if (done) {
+                break;
+            }
+            const chunk = decoder.decode(value, {stream: true});
+            onMessage(chunk);
+        }
+    }
+}
+
 export interface UploadFileRequest {
     file: File,
     sid: string | null
