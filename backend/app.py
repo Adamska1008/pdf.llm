@@ -1,6 +1,6 @@
 import os
 import uuid
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, Response
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from pypinyin import lazy_pinyin
@@ -115,6 +115,53 @@ def ask_question():
     response = agent.ask(question)
     return jsonify({"ai_message": response, "sid": session_id}), 200
 
+@app.route("/api/stream", methods=["POST"])
+def stream_question():
+    """
+    Ask question based on the pdf or not.
+
+    Json Body should contains:
+     - required:
+        - question (str): a question that user provide
+
+     - optional:
+        - fid (str): the uid of file to be retrieved. If not given, will not use rag.
+        - sid (str): the session id. If not given, will create a new one and respond with it.
+        - pageNumber (int)
+        - selectedText (string)
+
+    Response:
+        - ai_message (str): ai message
+        - sid (str) : session id given or generated
+    """
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "no dataprovided"}), 400
+
+    question: str | None = data.get("question")
+    if not question:
+        return jsonify({"error": "question is required"}), 400
+
+    session_id: str | None = data.get("sid")
+    print(f"Ask with session id {session_id}")
+    agent, session_id = get_agent(session_id)
+    fid: str | None = data.get("fid")
+    if fid is not None:
+        print(f"Ask with fid {fid}")
+        file_path = kvstore.get_file_path(fid)
+        agent.augmented_with(file_path)
+    page_number: int | None = data.get("pageNumber")
+    if page_number:
+        agent.focus_on_page(page_number)
+    selected_snippets = data.get("selectedText")
+    if selected_snippets:
+        agent.selected_snippets(selected_snippets)
+    # response = agent.ask(question)
+    # return jsonify({"ai_message": response, "sid": session_id}), 200
+    def generate_response():
+        for word in agent.stream(question):
+            yield word
+    return Response(generate_response(), content_type='text/event-stream'), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

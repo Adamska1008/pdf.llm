@@ -101,6 +101,33 @@ class RagChatBot:
             self._msgs.extend([HumanMessage(rag_input), AIMessage(resp)])
         return resp
 
+    def stream(self, question: str):
+        msg = ""
+        if self._augmented_with is None:
+            resp = self._chain.stream({"chat_history": self._msgs, "input": question})
+            for word in resp:
+                msg += word
+                yield word
+            self._msgs.extend([HumanMessage(question), AIMessage(msg)])
+        else:
+            question = (
+                question
+                if self.selected_text is None
+                else question + self.selected_text
+            )
+            docs = self._vectorstore.similarity_search(question, k=2)
+            rag_input = self._rag_usermsg_prompt.format(
+                question=question,
+                context=docs,
+                page_number=self._page_number,
+                selected_text=self.selected_text,
+            )
+            resp = self._chain.stream({"chat_history": self._msgs, "input": rag_input})
+            for word in resp:
+                msg += word
+                yield word
+            self._msgs.extend([HumanMessage(question), AIMessage(msg)])
+
 
 agents_pool: dict[str, RagChatBot] = {}
 
@@ -117,6 +144,8 @@ def get_agent(session_id: str | None = None) -> Tuple[RagChatBot, str]:
 # unit test
 if __name__ == "__main__":
     agent, sid = get_agent()
-    print(agent.ask("Hello, my name is Adam"))
-    print(agent.ask("What is my name?"))
-    print(agent.ask("what is 2 + 2 = ?"))
+    # print(agent.ask("Hello, my name is Adam"))
+    # print(agent.ask("What is my name?"))
+    # print(agent.ask("what is 2 + 2 = ?"))
+    for word in agent.stream("Create a poem about recursion in programming"):
+        print(word, sep="" ,end="")
