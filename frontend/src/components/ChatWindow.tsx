@@ -26,40 +26,20 @@ const ChatWindow = ({ currentPage, selectedSnippets, onFileUpload }: ChatWindowP
             pageNumber: currentPage,
             selectedSnippets: selectedSnippets,
         }
+        setMessages((prevMessages) => [...prevMessages, ""])
         try {
-            const response: AskResponse = await apiAsk(message);
-
-            if (response.sid) {
-                console.log(`Get sid ${response.sid} from response`);
-                setSid(response.sid);
-                console.log("The sid is set to", sid);
-            } else {
-                console.error("missing session_id in response from /api/ask", response);
-            }
-            if (response.ai_message) {
-                setMessages((prevMessages) => [...prevMessages, response.ai_message]);
-            } else {
-                console.error("missing ai in response from /api/ask", response);
-            }
+            await apiStream(message, (data) => {
+                setMessages((prevMessages) => {
+                    let newMessages = [...prevMessages];
+                    const lastIndex = newMessages.length - 1;
+                    console.log(lastIndex);
+                    newMessages[lastIndex] += data; // 更新对应索引的消息
+                    return newMessages;
+                });
+            });
         } catch (error) {
             console.error("Error on handleSendMessage: ", error);
         }
-        // try {
-        //     const idx = messages.length;
-        //     let msg = ""; 
-        //     setMessages((prevMessages) => [...prevMessages, msg])
-        //     await apiStream(message, (data) => {
-        //         msg += data;
-        //         setMessages((prevMessages) => {
-        //             const newMessages = [...prevMessages];
-        //             newMessages[idx] = msg; // 更新对应索引的消息
-        //             return newMessages;
-        //         });
-        //     });
-        // } catch (error) {
-        //     console.error("Error on handleSendMessage: ", error);
-        // }
-
     }
 
 
