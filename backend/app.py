@@ -72,7 +72,6 @@ def uploaded_file(fid: str):
 
 @app.route("/api/ask", methods=["POST"])
 def ask_question():
-    # TODO: use stream api
     """
     Ask question based on the pdf or not.
 
@@ -160,7 +159,6 @@ def stream_question():
     # return jsonify({"ai_message": response, "sid": session_id}), 200
     def generate_response():
         for word in agent.stream(question):
-            print(word)
             yield word
     return Response(generate_response(), content_type='text/event-stream'), 200
 

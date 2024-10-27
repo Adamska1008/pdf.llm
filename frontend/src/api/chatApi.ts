@@ -31,6 +31,7 @@ export const apiAsk = async (message: AskMessage): Promise<AskResponse> => {
 }
 
 export const apiStream = async (message: AskMessage, onMessage: (data: string) => void) : Promise<void> => {
+    console.log("Send message", message);
     const response = await fetch('http://localhost:5000/api/stream', {
         method: "POST",
         headers: {

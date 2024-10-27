@@ -26,13 +26,13 @@ const ChatWindow = ({ currentPage, selectedSnippets, onFileUpload }: ChatWindowP
             pageNumber: currentPage,
             selectedSnippets: selectedSnippets,
         }
+        console.log(selectedSnippets)
         setMessages((prevMessages) => [...prevMessages, ""])
         try {
             await apiStream(message, (data) => {
                 setMessages((prevMessages) => {
                     let newMessages = [...prevMessages];
                     const lastIndex = newMessages.length - 1;
-                    console.log(lastIndex);
                     newMessages[lastIndex] += data; // 更新对应索引的消息
                     return newMessages;
                 });

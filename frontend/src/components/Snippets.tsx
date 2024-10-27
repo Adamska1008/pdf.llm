@@ -57,18 +57,18 @@ const SnippetsPanel = ({ onSelectSnippets }: SnippetsPanelProps) => {
         index: number
     ) => {
         setSelected(prevSet => {
-            const newSet = new Set(prevSet);
+            let newSet = new Set(prevSet);
             if (newSet.has(index)) {
                 newSet.delete(index);
             } else {
                 newSet.add(index);
             }
+            onSelectSnippets(
+                Array.from(newSet).map(index => snippets[index]).filter(str => str !== undefined)
+            );
+            console.log(newSet);
             return newSet;
         });
-        // update the selected text to App.tsx
-        onSelectSnippets(
-            Array.from(selected).map(index => snippets[index]).filter(str => str !== undefined)
-        );
     };
 
     const handleUnpinnedSnippetClick = (text: string) => {
@@ -83,7 +83,7 @@ const SnippetsPanel = ({ onSelectSnippets }: SnippetsPanelProps) => {
             component="nav"
             sx={{ maxWidth: 360 }}
         >
-            {snippets.map((text, index) => (
+            {snippets.map((text, index) => ( // regular snippets
                 <ListItem>
                     <ListItemButton
                         selected={selected.has(index)}
@@ -98,16 +98,17 @@ const SnippetsPanel = ({ onSelectSnippets }: SnippetsPanelProps) => {
                     </ListItemButton>
                 </ListItem>
             ))}
-            {textFromPdf && (<ListItem>
-                <ListItemButton>
-                    <ListItemText
-                        sx={listItemTextStyle(false)}
-                        onClick={() => handleUnpinnedSnippetClick(textFromPdf)}
-                    >
-                        {textFromPdf}
-                    </ListItemText>
-                </ListItemButton>
-            </ListItem>)}
+            {textFromPdf && // selection
+                (<ListItem>
+                    <ListItemButton>
+                        <ListItemText
+                            sx={listItemTextStyle(false)}
+                            onClick={() => handleUnpinnedSnippetClick(textFromPdf)}
+                        >
+                            {textFromPdf}
+                        </ListItemText>
+                    </ListItemButton>
+                </ListItem>)}
         </List >
     )
 };
