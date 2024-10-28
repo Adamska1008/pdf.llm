@@ -16,6 +16,8 @@ from langchain_core.prompts import (
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, BaseMessage
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.callbacks import get_openai_callback
+from loguru import logger
 
 
 class RagChatBot:
@@ -42,7 +44,6 @@ class RagChatBot:
         )
         self._llm = ChatOpenAI()
         self._str_parser = StrOutputParser()
-        self._retriever = None
         self._vectorstore = None
         self._page_number = None
         self._selected_snippets = None
@@ -81,9 +82,9 @@ class RagChatBot:
             res += f"第{index}段文本：\n{snippet}\n"
         return res
 
-    def ask(self, question: str) -> str:
+    def _generate_input(self, question: str) -> str:
         if self._augmented_with is None:
-            resp = self._chain.invoke({"chat_history": self._msgs, "input": question})
+            return question
         else:
             question = (
                 question
@@ -91,15 +92,30 @@ class RagChatBot:
                 else question + self.selected_text
             )
             docs = self._vectorstore.similarity_search(question, k=2)
-            rag_input = self._rag_usermsg_prompt.format(
+            return self._rag_usermsg_prompt.format(
                 question=question,
                 context=docs,
                 page_number=self._page_number,
                 selected_text=self.selected_text,
             )
-            resp = self._chain.invoke({"chat_history": self._msgs, "input": rag_input})
-        self._msgs.extend([HumanMessage(question), AIMessage(resp)])
+
+    def ask(self, question: str) -> str:
+        inp = self._generate_input(question)
+        resp = self._chain.invoke({"chat_history": self._msgs, "input": inp})
+        self._msgs.extend([HumanMessage(inp), AIMessage(resp)])
         return resp
+
+    def stream(self, question: str):
+        msg = ""
+        inp = self._generate_input(question)
+        logger.info(f"Input:\n{inp}")
+        with get_openai_callback() as cb:
+            resp = self._chain.stream({"chat_history": self._msgs, "input": inp})
+            for word in resp:
+                msg += word
+                yield word
+            logger.info(cb)
+        self._msgs.extend([HumanMessage(question), AIMessage(msg)])
 
 
 agents_pool: dict[str, RagChatBot] = {}
@@ -117,6 +133,5 @@ def get_agent(session_id: str | None = None) -> Tuple[RagChatBot, str]:
 # unit test
 if __name__ == "__main__":
     agent, sid = get_agent()
-    print(agent.ask("Hello, my name is Adam"))
-    print(agent.ask("What is my name?"))
-    print(agent.ask("what is 2 + 2 = ?"))
+    for word in agent.stream("Create a poem about recursion in programming"):
+        print(word, sep="", end="")

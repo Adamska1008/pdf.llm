@@ -3,12 +3,11 @@ import PersonIcon from '@mui/icons-material/Person'
 import AndroidIcon from '@mui/icons-material/Android'
 
 interface MessageItemProps {
-    index: number,
     message: string,
     from: string
 };
 
-const MessageItem = ({ index, message, from }: MessageItemProps) => {
+const MessageItem = ({ message, from }: MessageItemProps) => {
     const flex = from === 'user' ? 'flex-end' : 'flex-start';
     const IconComponent = from === 'user' ? PersonIcon : AndroidIcon;
     return (
@@ -38,7 +37,6 @@ const MessageDisplay = ({ messages }: MessageDisplayProps) => {
             <Stack spacing={3} sx={{ p: 2 }}>
                 {messages.map((message, index) => (
                     <MessageItem
-                        index={index}
                         message={message}
                         from={index % 2 === 0 ? 'user' : 'ai'}
                     />

@@ -25,10 +25,11 @@ const listItemTextStyle = (isSelected: boolean) => ({
 });
 
 interface SnippetsPanelProps {
-    setSelectedSnippets: React.Dispatch<React.SetStateAction<string[] | null>>
+    // when selectedSnippets is updated, the function shouble be called and pass the updated value to it
+    onSelectSnippets: (snippets: string[]) => void,
 };
 
-const SnippetsPanel = ({ setSelectedSnippets }: SnippetsPanelProps) => {
+const SnippetsPanel = ({ onSelectSnippets }: SnippetsPanelProps) => {
     // here selection means the text which use selected in pdf viewer
     const [snippets, setSnippets] = useState<string[]>([]);
     const [selected, setSelected] = useState<Set<number>>(new Set<number>());
@@ -56,18 +57,18 @@ const SnippetsPanel = ({ setSelectedSnippets }: SnippetsPanelProps) => {
         index: number
     ) => {
         setSelected(prevSet => {
-            const newSet = new Set(prevSet);
+            let newSet = new Set(prevSet);
             if (newSet.has(index)) {
                 newSet.delete(index);
             } else {
                 newSet.add(index);
             }
+            onSelectSnippets(
+                Array.from(newSet).map(index => snippets[index]).filter(str => str !== undefined)
+            );
+            console.log(newSet);
             return newSet;
         });
-        // update the selected text to App.tsx
-        setSelectedSnippets(
-            Array.from(selected).map(index => snippets[index]).filter(str => str !== undefined)
-        );
     };
 
     const handleUnpinnedSnippetClick = (text: string) => {
@@ -82,7 +83,7 @@ const SnippetsPanel = ({ setSelectedSnippets }: SnippetsPanelProps) => {
             component="nav"
             sx={{ maxWidth: 360 }}
         >
-            {snippets.map((text, index) => (
+            {snippets.map((text, index) => ( // regular snippets
                 <ListItem>
                     <ListItemButton
                         selected={selected.has(index)}
@@ -97,16 +98,17 @@ const SnippetsPanel = ({ setSelectedSnippets }: SnippetsPanelProps) => {
                     </ListItemButton>
                 </ListItem>
             ))}
-            {textFromPdf && (<ListItem>
-                <ListItemButton>
-                    <ListItemText
-                        sx={listItemTextStyle(false)}
-                        onClick={() => handleUnpinnedSnippetClick(textFromPdf)}
-                    >
-                        {textFromPdf}
-                    </ListItemText>
-                </ListItemButton>
-            </ListItem>)}
+            {textFromPdf && // selection
+                (<ListItem>
+                    <ListItemButton>
+                        <ListItemText
+                            sx={listItemTextStyle(false)}
+                            onClick={() => handleUnpinnedSnippetClick(textFromPdf)}
+                        >
+                            {textFromPdf}
+                        </ListItemText>
+                    </ListItemButton>
+                </ListItem>)}
         </List >
     )
 };
