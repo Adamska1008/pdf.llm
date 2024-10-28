@@ -29,7 +29,7 @@ class RagChatBot:
         self._augmented_with: str | None = None
         self._msgs: list[BaseMessage] = []
         self._rag_usermsg_prompt = PromptTemplate.from_template(
-            "根据提供的问题，解决用户提出的问题。"
+            "根据提供的问题，解决用户提出的问题。\n"
             "问题: {question}"
             "用户正在看第{page_number}页，请从第{page_number}页上寻找相关信息。"
             "用户选中了文本，如下所示：\n{selected_text}\n请在解决问题时参考这一部分的内容。"
@@ -86,12 +86,15 @@ class RagChatBot:
         if self._augmented_with is None:
             return question
         else:
-            question = (
-                question
-                if self.selected_text is None
-                else question + self.selected_text
-            )
-            docs = self._vectorstore.similarity_search(question, k=2)
+            # retrieve docs
+            if self.selected_text:
+                question_with_selected_text = question + self.selected_text
+                docs = self._vectorstore.similarity_search(
+                    question_with_selected_text, k=2
+                )
+            else:
+                docs = self._vectorstore.similarity_search(question, k=2)
+            # build `input`
             return self._rag_usermsg_prompt.format(
                 question=question,
                 context=docs,

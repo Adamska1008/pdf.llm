@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 from pypinyin import lazy_pinyin
 from .agent import get_agent
 from .lodis import LocalDist
+from loguru import logger
 
 app = Flask(__name__)
 CORS(app)
@@ -152,11 +153,10 @@ def stream_question():
     page_number: int | None = data.get("pageNumber")
     if page_number:
         agent.focus_on_page(page_number)
-    selected_snippets = data.get("selectedText")
+    selected_snippets = data.get("selectedSnippets")
     if selected_snippets:
         agent.selected_snippets(selected_snippets)
-    # response = agent.ask(question)
-    # return jsonify({"ai_message": response, "sid": session_id}), 200
+    logger.info("Selected snippets: ", selected_snippets)
     def generate_response():
         for word in agent.stream(question):
             yield word
